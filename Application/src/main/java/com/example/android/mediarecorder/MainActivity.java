@@ -34,6 +34,8 @@ import com.example.android.common.media.CameraHelper;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  *  This activity uses the camera/camcorder as the A/V source for the {@link android.media.MediaRecorder} API.
@@ -57,6 +59,27 @@ public class MainActivity extends Activity {
 
         mPreview = (TextureView) findViewById(R.id.surface_view);
         captureButton = (Button) findViewById(R.id.button_capture);
+
+        new MediaPrepareTask().execute(null, null, null);
+
+
+//to stop after 20 seconds  use the Timer Schedule function:
+        new Timer().schedule(
+                new TimerTask() {
+                    @Override
+                    public void run() {
+                        mMediaRecorder.stop();  // stop the recording
+                        releaseMediaRecorder(); // release the MediaRecorder object
+                        mCamera.lock();         // take camera access back from MediaRecorder
+
+                        // inform the user that recording has stopped
+                        setCaptureButtonText("Capture");
+                        isRecording = false;
+                        releaseCamera();
+                    }
+                },
+                20000
+        );
     }
 
     /**
